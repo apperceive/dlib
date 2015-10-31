@@ -1,0 +1,32 @@
+#!/usr/bin/env drush
+<?php
+
+
+
+//include_once("/home/markus/node.class.inc");
+//drush_include("/home/markus/projects/dlib/", "node.class");
+drush_include("/home/markus/projects/dlib/src", "node.class");
+ 
+
+
+$nd = new nodeClass(207);
+
+print $nd->get('title') . "\n";
+
+print $nd->get('field_messaging_obs_message') . "\n";
+
+print $nd->get('field_project_subject', -2, 0, 'field_project_subject_email') . "\n";
+
+// should return error since this is not an array
+print $nd->get('field_project_subject', -3, 1, 'field_project_subject_email') . "\n";
+
+print $nd->get('field_project_observers', -4, 0, 'field_project_subject_email') . "\n";
+
+print $nd->get('field_project_observers', -5, 3, 'field_project_subject_email') . "\n";
+
+// this should return an array of observers, so let's dump it
+// note that this is still raw drupal LANGAUGE_NONE ... inside each array element
+// will need a function to take standard $nd->[LANGUAGE_NONE][0]... to array('subfieldname' => value)
+$arr = $nd->get('field_project_observers', array(1,2,3));
+print "observers DUMP:\n";
+var_dump($arr);

@@ -1,0 +1,23 @@
+#!/usr/bin/env drush
+<?php 
+
+//include_once("/home/markus/sln_project_360.class.inc");
+
+drush_include(".", "sln_project_360.class");
+
+$node = node_load(207); // assume a sln_project_360 
+
+//r_dump($node);
+
+$p = new sln_project_360Class($node); 
+
+print "title: " . $p->get_title() . "\n"; 
+
+//print "object: " . $p->toString() . "\n"; 
+
+//var_dump($p);
+
+
+print "observers: " . $p->get_observers()  . "\n"; 
+
+?>

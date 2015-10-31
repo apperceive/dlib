@@ -1,0 +1,27 @@
+#!/usr/bin/env drush
+<?php
+
+  // drush uses "args" array
+  $args = drush_get_arguments() ;
+  $classname = array_key_exists(2,$args) ? $args[2] : "unknown";
+  $meths = "";
+
+  $fields = field_info_extra_fields('node', $classname, 'form');
+  $fields += field_info_instances('node', $classname); 
+  foreach ($fields as $fieldname => $ctdata) {
+    $name = str_replace(array('field_project_','field_', ),'', $fieldname);
+    $meths .= "  public function get_$name() { return \$this->out(\$this->_project->{$fieldname}, 1); }\n";
+    $meths .= "  public function set_$name(\$$name) {}\n\n";
+  } 
+
+  $props = "  protected \$_project = NULL;\n";
+  
+  $ctor = "  public function __construct(\$node) { \$this->_project = \$node; }\n";
+  $ctor .= "  public function toString() { return var_export(\$this->_project, 1); }\n";
+  $ctor .= "  protected function out(\$obj) { return is_string(\$obj) ? \$obj : var_export(\$obj, 1); }\n";
+
+  $c = "<?php\n\nclass {$classname}Class { \n\n$props\n$ctor\n$meths\n} // {$classname}Class\n\n";
+  print $c;
+  
+  //print json_encode($fields);
+?>

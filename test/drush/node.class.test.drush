@@ -5,6 +5,8 @@
 
 //include_once("/home/markus/node.class.inc");
 //drush_include("/home/markus/projects/dlib/", "node.class");
+
+// TODO: make this relative
 drush_include("/home/markus/projects/dlib/src", "node.class");
  
 

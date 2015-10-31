@@ -32,14 +32,14 @@ class nodeClass {
     // TODO: allow passing keys with this array as default
     $keys = array('nid', 'uid', 'tid', 'value');
     
-    if (!$this->node || !isset($this->node->{$fieldname})) 
+    if (!($this->node && isset($this->node->{$fieldname}))) 
       return $retval;
     
     $field = $this->node->{$fieldname};
     
     // scalar
     if ($field && !is_array($field))
-      return $field;
+      return $field;               // e.g. title
     
     // not a valid field
     if (!($field && is_array($field) && array_key_exists(LANGUAGE_NONE, $field) && is_array($field[LANGUAGE_NONE]))) 
@@ -49,49 +49,54 @@ class nodeClass {
     if (is_null($ndx) && !array_key_exists($ndx, $field[LANGUAGE_NONE]))
       return $retval;
     
+    // check if $fieldname[LANGUAGE_NONE][0] is a scalar
+    if (!is_array($field[LANGUAGE_NONE][0]))
+      return $field[LANGUAGE_NONE][0] . "-yyy";  
+    
+    // if not a list, multi if $fieldname[LANGUAGE_NONE][0] keys have 'id' or 'field_...'
+    // if a list, multi if all $fieldname[LANGUAGE_NONE][$ndx] keys have 'id' or 'field_...'
+    // so just test [0]
+    // TODO: extend test to look for at least one 'field_*' element?
+    $is_multi = array_key_exists('id', $field[LANGUAGE_NONE][0]);
+      
     $cnt = count($field[LANGUAGE_NONE]);
     $is_list = $cnt > 1;
-    // if not a list, multi if $fieldname[LANGUAGE_NONE][0] keys have form id or field_...
-    // if a list, multi if all $fieldname[LANGUAGE_NONE][$ndx] keys have form id or field_...
-    // so just test [0]
-    // extend test to look for at least one 'field_*' element?
-    $is_multi = array_key_exists('id', $fieldname[LANGUAGE_NONE][0]);
-      
     if ($is_list && is_null($ndx))
       $fielditem = $field[LANGUAGE_NONE];
     else
       $fielditem = $field[LANGUAGE_NONE][$ndx];
     
+    
+    // check if $fielditem is a string
+    if (!is_array($fielditem))
+      return $fielditem . "-xxx";    
+    
     // test for subfield name
-    if ($subfieldname && !array_key_exists($subfilename, $fieldname))
+    if ($subfieldname && !array_key_exists($subfieldname, $fielditem))
       return $retval;
-
       
+    // TODO: return actual values
     if ($is_list) {
       if (is_null($ndx))
         if ($is_multi)
-          print "return object\n";
+          return "array object";
         else
-          print "return scalar\n";
+          return "array scalar";
       else
         if ($is_multi)
-          print "return array of objects\n";
+          return "array of objects";
         else
-          print "return array of scalars\n";
+          return "array of scalars";
     }
     else {
       if ($is_multi)
-        print "return object\n";
+        return "multi object";
       else
-        print "return scalar\n";
+        return "multi scalar";
     } // not $is_list
 
-
-
-    // unlikely?
-    if ($fielditem && (is_string($fielditem) || is_numeric($fielditem)))
-      return $fielditem;
     
+    /*
     if (!$subfieldname) {
       
          // return array of of values if list, possibly empty
@@ -105,13 +110,10 @@ class nodeClass {
       return $retval;
     } // $subfieldname
 
-    
     if (is_array($fielditem) && array_key_exists($subfieldname, $fielditem)) {
       //if ($subfieldname == 'field_project_subject_email') 
       //print "in a subfield\n";
       $subfield = $field[LANGUAGE_NONE][$ndx][$subfieldname];
- 
- //var_dump($subfield);
  
       if ($subfield && is_array($subfield) && array_key_exists(LANGUAGE_NONE, $subfield) &&   is_array($subfield[LANGUAGE_NONE]) && array_key_exists(0, $subfield[LANGUAGE_NONE])) {
         $subfielditem = $subfield[LANGUAGE_NONE][0];
@@ -125,6 +127,9 @@ class nodeClass {
          // return array of array of all multi values indexed by subfieldname
       }
     } // 
+    
+    */
+    
     return $retval;  
   } // get()
 

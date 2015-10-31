@@ -13,25 +13,25 @@ drush_include("/home/markus/projects/dlib/src", "node.class");
 
 $nd = new nodeClass(207);
 
-print "0: " . $nd->get('title') . "\n";
+print "title: " . $nd->get('title') . "\n";
 
-print "1: " . $nd->get('field_project_status') . "\n";
+print "field_project_status: " . $nd->get('field_project_status') . "\n";
 
-print "2: " . $nd->get('field_messaging_obs_message') . "\n";
+print "field_messaging_obs_message: " . $nd->get('field_messaging_obs_message') . "\n";
 
-print "3: " . $nd->get('field_project_subject', -2, 0, 'field_project_subject_email') . "\n";
+print "field_project_subject.field_project_subject_email[0]: " . $nd->get('field_project_subject', -2, 0, 'field_project_subject_email') . "\n";
 
 // should return null since this is not an array
 $v = $nd->get('field_project_subject', -3, 1, 'field_project_subject_email');
-print "4: " . ($v ? $v : "NULL") . "\n";
+print "field_project_subject.field_project_subject_email[1]: " . ($v ? $v : "NULL") . "\n";
 
-print "5: " . $nd->get('field_project_observers', -4, 0, 'field_project_subject_email') . "\n";
+print "field_project_observers.field_project_observer_email[0]: " . $nd->get('field_project_observers', -4, 0, 'field_project_observer_email') . "\n";
 
-print "6: " . $nd->get('field_project_observers', -5, 3, 'field_project_subject_email') . "\n";
+print "field_project_observers.field_project_observer_email: " . $nd->get('field_project_observers', -5, 3, 'field_project_observer_email') . "\n";
 
 // this should return an array of observers, so let's dump it
 // note that this is still raw drupal LANGAUGE_NONE ... inside each array element
 // will need a function to take standard $nd->[LANGUAGE_NONE][0]... to array('subfieldname' => value)
 $arr = $nd->get('field_project_observers', array(1,2,3));
-print "7: " . "observers DUMP:\n";
+print "field_project_observers (array): " . "observers DUMP:\n";
 var_dump($arr);

@@ -13,6 +13,8 @@
 class nodeClass {
   
   protected $node = NULL;
+  
+  protected $keys = array('nid', 'uid', 'tid', 'value');
 
   public function __construct($node) { 
     if ($node > 0)
@@ -35,17 +37,14 @@ class nodeClass {
   */
 
   // assumption: multifields and lists of multifields one level deep
-  // eg. $node->field->subfield or $node->field can be lists or multis but no deeper
+  // eg. $node->field->subfieldname or $node->field can be lists or multis but no deeper
   // null $ndx means return all items as array if more than one, otherwise return scalar
-  // return object for multivalue when subfield is null
+  // return object for multivalue when subfieldname is null
   public function get($fieldname, $retval = null, $ndx = null, $subfieldname = null) {
     
     // check that $this->node is valid
     if (!($this->node && $this->node->type))
       return $retval;
-    
-    // TODO: allow passing keys with this array as default
-    $keys = array('nid', 'uid', 'tid', 'value');
     
     if (!($this->node && isset($this->node->{$fieldname}))) 
       return $retval;
@@ -80,13 +79,10 @@ class nodeClass {
     // TODO: rename to $has_list?
     // looks like we need meta data
     $is_list = $cnt > 1; 
-    
-    
-    
-  // Drupal  API calls 
-    $fields = field_info_extra_fields('node', $this->node->type, 'form');
-    $fields += field_info_instances('node', $this->node->type);     
-    
+
+    // Drupal  API calls 
+    //$fields = field_info_extra_fields('node', $this->node->type, 'form');
+    //$fields += field_info_instances('node', $this->node->type);     
     
     if ($is_list && is_null($ndx))
       $fielditem = $field[LANGUAGE_NONE];
@@ -95,32 +91,29 @@ class nodeClass {
       if (is_array($field[LANGUAGE_NONE]) && array_key_exists($i, $field[LANGUAGE_NONE]))      
         $fielditem = $field[LANGUAGE_NONE][$i];
       else
-        return "ret - 5"; // todo - list with one element? ???
+        return "ret - 555"; // todo - list with one element? ???
     }
     
     // check if $fielditem is a string
     if (!is_array($fielditem))
       return $fielditem . "-xxx";    
     
-    // test for subfield name
-    if ($subfieldname && !array_key_exists($subfieldname, $fielditem))
-      return "ret - 3"; //$retval;      
-      
+    //if ("field_project_observer_email" == $subfieldname)
+    //  var_dump($fielditem);     
+    
+
+    // test for subfieldname
+    //if ($subfieldname && !array_key_exists($subfieldname, $fielditem))
+    //  return $retval;
+    
     // TODO: return actual values
     if ($is_list) {
-      $arr = array();
-      if (is_null($ndx))
+      $arr = array();        
+      if (is_null($ndx)) {
         if ($is_multi) {
-          foreach($fielditem as $key => $value) {
-
-            // check for subfield, else return all fields
-            if (is_null($subfieldname))
-              if (array_key_exists($subfieldname, $value))
-                return $retval;
-              $v = $value[];
-            else
-              $v = "object goes here)"; // TODO:
-            $arr[$key] = $v; 
+          foreach($fielditem as $key => $value) {   
+            $arr[$key] = $this->get_obj_or_value($value, $subfieldname, NULL); 
+            // return object?
           }
           return $arr; // "array of objects";
         }
@@ -129,72 +122,160 @@ class nodeClass {
             $arr[$key] = $value;
           return $arr; // "array of scalars";
         }
-      else
+      }
+      else {
+
+        if (array_key_exists($ndx, $fielditem))
+            $fielditem = $subfieldname[$ndx];
+        else if (array_key_exists($ndx, $fielditem))
+            $fielditem = $fielditem[$ndx];
+        return $this->get_obj_or_value($fielditem, $subfieldname, $retval);
+      }
+        /*
         if ($is_multi) {
-          
-          // check for subfield, else return all fields
-          
-          return $fielditem[$ndx]; // more to do?
+          return $this->get_obj_or_value($fielditem[$ndx], $subfieldname, $retval);
           //return "array element, object";
         }
         else {
-          return $fielditem[$ndx];
+          return $this->get_obj_or_value($fielditem[$ndx], $subfieldname, $retval);
           //return "array element, scalar";
         }
+        */
     }
     else {
-      if ($is_multi)
-        // check for subfield, else return all fields  
       
-        return "multi object";
-      else {   
-        foreach ($keys as $key)
-          if (array_key_exists($key, $fielditem))
-            return $fielditem[$key];  // call get again?
+       //if ("field_project_observer_email" == $fieldname)
+     //   var_dump($fielditem);     
+
+
+        
+      if ($is_multi) {
+        //var_dump($this->get_obj_or_value($fielditem, $subfieldname, $retval));
+        return $this->get_obj_or_value($fielditem, $subfieldname, $retval);
+        //return "multi object";
+      }
+      else {         
+        // get_objs_or_values   
+        $d = $this->check_keys($fielditem, $retval);
+        if (!($d === $retval))
+          return $d;
+           
+        //foreach ($this->keys as $key)
+         // if (array_key_exists($key, $fielditem))
+         //   return $this->get_obj_or_value($fielditem[$key], $subfieldname, $retval); 
           
         // todo: not a known key?
-        return "ret - 7"; // $fielditem; // "scalar"; uid, val etc
+        return "ret - 777"; // $fielditem; // "scalar"; uid, val etc
       }
     } // not $is_list
 
-    
-    /*
-    if (!$subfieldname) {
-      
-         // return array of of values if list, possibly empty
-         // return object with properties if multi 
-         // return scalar if not multi and not list
-      
-      // search for likely keys
-      foreach ($keys as $key)
-        if (array_key_exists($key, $fielditem))
-          return $fielditem[$key];  // call get again?
-      return $retval;
-    } // $subfieldname
-
-    if (is_array($fielditem) && array_key_exists($subfieldname, $fielditem)) {
-      //if ($subfieldname == 'field_project_subject_email') 
-      //print "in a subfield\n";
-      $subfield = $field[LANGUAGE_NONE][$ndx][$subfieldname];
- 
-      if ($subfield && is_array($subfield) && array_key_exists(LANGUAGE_NONE, $subfield) &&   is_array($subfield[LANGUAGE_NONE]) && array_key_exists(0, $subfield[LANGUAGE_NONE])) {
-        $subfielditem = $subfield[LANGUAGE_NONE][0];
-        // search for likely keys
-        foreach ($keys as $key)
-          if (array_key_exists($key, $subfielditem))
-            return $subfielditem[$key];  // call get again?
-        
-      } else {
-         // return array of of values if not multi
-         // return array of array of all multi values indexed by subfieldname
-      }
-    } // 
-    
-    */
-    
-    return "ret - last"; //$retval;      
+    return "ret - LAST"; //$retval;      
   } // get()
 
+  
+  // not used?
+  // get array or singleton of objects or values
+  public function get_objs_or_values($data = array(), $fname = NULL, $retval = NULL) {
+    
+    // return single object
+    if (is_array($data) && array_key_exists(0, $data) && count($data) == 1) {
+      $data = $data[0];
+      $arr = array('aaa' => 'aaa');
+      foreach ($data as $key => $value)
+        $arr[$key] = $this->get_obj_or_value($value);
+      return $arr;
+    }
+    
+    // return array of objects
+    if (is_array($data) && array_key_exists(0, $data) && count($data) > 1) {
+      $arr2 = array('ggg' => 'ggg');
+      foreach ($data as $ndx => $d) {
+        $arr = array();
+        foreach ($data as $key => $value)
+          $arr[$key] = $this->get_obj_or_value($value);
+        $arr2[$ndx] = $arr;
+      }
+      return $arr2;      
+    }
+    return $retval;
+  } // get_objs_or_values
+  
+  // get an object or value in something of the form $f[LANGUAGE_NONE][0]['keyname']
+  // return the value associated with key name if supplied or one of 'nid', 'uid', etc
+  // otherwise return entire endpoint as an array, indexed by fieldname
+  public function get_obj_or_value($data, $fieldname = NULL, $retval = NULL) {
+    
+    if (!(is_array($data) || is_object($data)))
+      return $data;  // scalar
+    
+    if (is_object($data))
+      return (array) $data;
+    
+    if (is_array($data) && array_key_exists(LANGUAGE_NONE, $data))
+      $data = $data[LANGUAGE_NONE];
+      
+    if (is_array($data) && !is_null($fieldname) && array_key_exists($fieldname, $data)) {
+      $data = $data[$fieldname];
+      if (is_array($data) && array_key_exists(LANGUAGE_NONE, $data))
+        $data = $data[LANGUAGE_NONE];
+      if (is_array($data) && array_key_exists(0, $data))
+        $data = $data[0]; 
+      if (is_array($data) && array_key_exists('value', $data))
+        $data = $data['value']; 
+      
+      $d = $this->check_keys($data, $retval);
+      if (!($d === $retval)) 
+        return $d;
+
+      //if ("field_project_subject_email" == $fieldname)
+      //  var_dump($data);
+     return $data;  // may be an array[und][0][?}
+    }
+  
+    if (is_array($data) && array_key_exists(0, $data))
+      $data = $data[0];
+    
+    $d = $this->check_keys($data, $retval);
+    if (!($d === $retval))
+      return $d;
+      
+    if (is_array($data) && !is_null($fieldname) && array_key_exists(fieldname, $data))
+      return $data[$fieldname];
+
+    // return object with field names or array
+    
+    if (is_null($fieldname)) {
+      $arr = array();
+      if (is_array($data)) {
+        foreach ($data as $key => $value) {
+          if ($this->is_drupal_object($value))
+            $arr[$key] = $value[LANGUAGE_NONE][0]['value'];
+          else
+            $arr[$key] = $value;
+        }
+        return $arr;
+      }
+      else 
+        return $data;
+    } // null fieldname
+    
+    
+    return $retval;
+  } // $this->get_obj_or_value
+  
+  public function check_keys($data, $retval = NULL) {
+    if (!is_null($data) && is_array($data)) {
+      foreach ($this->keys as $key)
+        if (array_key_exists($key, $data))
+          return $data[$key]; 
+    }
+    return $retval;
+  } //check_keys
+  
+  public function is_drupal_object($value) {
+     return is_array($value) && array_key_exists(LANGUAGE_NONE, $value) && is_array($value[LANGUAGE_NONE]) && array_key_exists(0, $value[LANGUAGE_NONE]) && is_array($value[LANGUAGE_NONE][0]) && array_key_exists('value', $value[LANGUAGE_NONE][0]);
+  } // is_drupal_object
+  
 
 } // nodeClass
 

@@ -24,37 +24,63 @@ function out($l, $v) {
     drush_print("$l: $v"); 
 } // out
 
+function outputProject($nd) {
+
+  out('title', $nd->get('title'));
+
+  out('type', $nd->get('type'));
+
+  out('status', $nd->get('status'));
+
+  out('markywarky (INTENTIONAL BAD FIELDNAME)', $nd->get('markywarky'));
+
+  out('field_project_status', $nd->get('field_project_status'));
+
+  out('field_project_manager', $nd->get('field_project_manager'));
+
+  out('field_messaging_obs_message', $nd->get('field_messaging_obs_message'));
+
+  out('field_project_subject.field_project_subject_email', $nd->get('field_project_subject', -7, NULL, 'field_project_subject_email'));
+
+  out('field_project_subject.field_project_subject_email[0]', $nd->get('field_project_subject', -2, 0, 'field_project_subject_email'));
+
+  out('field_project_subject.field_project_subject_email[1] (INTENTIONAL BAD NDX)', $nd->get('field_project_subject', -3, 1, 'field_project_subject_email'));
+
+  out('field_project_subject.field_project_subject_email[99] (INTENTIONAL BAD NDX, no retval)', $nd->get('field_project_subject', NULL, 99, 'field_project_subject_email'));
+
+  out('field_project_observers.field_project_observer_email', $nd->get('field_project_observers', -3, NULL, 'field_project_observer_email'));
+
+  out('field_project_observers.field_project_observer_email[0]', $nd->get('field_project_observers', -4, 0, 'field_project_observer_email'));
+
+  out('field_project_observers.field_project_observer_email[3]', $nd->get('field_project_observers', -5, 3, 'field_project_observer_email'));
+
+  out('field_project_observers.field_project_observer_email[100] (INTENTIONAL BAD index)', $nd->get('field_project_observers', -8, 100, 'field_project_observer_email'));
+
+  out('field_project_observers.field_project_observer_emailXXX (INTENTIONAL BAD subfield)', $nd->get('field_project_observers', -6, 3, 'field_project_observer_XXXemail'));
+
+  // this should return an array of observers, so let's dump it
+  // note that this is still raw drupal LANGAUGE_NONE ... inside each array element
+  // will need a function to take standard $nd->[LANGUAGE_NONE][0]... to array('subfieldname' => value)
+  out('field_project_observers', $nd->get('field_project_observers', array(1,2,3)));
+
+} // outputProject
+
+
 
 $nd = new nodeClass(207);
+outputProject($nd);
 
-out('title', $nd->get('title'));
 
-out('type', $nd->get('type'));
+$nd = new nodeClass(208);
+outputProject($nd);
 
-out('status', $nd->get('status'));
 
-out('markywarky (INTENTIONAL BAD FIELDNAME)', $nd->get('markywarky'));
+$nd = new nodeClass(205);
+outputProject($nd);
 
-out('field_project_status', $nd->get('field_project_status'));
 
-out('field_project_manager', $nd->get('field_project_manager'));
 
-out('field_messaging_obs_message', $nd->get('field_messaging_obs_message'));
 
-out('field_project_subject.field_project_subject_email[0]', $nd->get('field_project_subject', -2, 0, 'field_project_subject_email'));
 
-out('field_project_subject.field_project_subject_email[1] (INTENTIONAL BAD NDX)', $nd->get('field_project_subject', -3, 1, 'field_project_subject_email'));
 
-out('field_project_subject.field_project_subject_email[1] (INTENTIONAL BAD NDX, no retval)', $nd->get('field_project_subject', NULL, 1, 'field_project_subject_email'));
-
-out('field_project_observers.field_project_observer_email[0]', $nd->get('field_project_observers', -4, 0, 'field_project_observer_email'));
-
-out('field_project_observers.field_project_observer_email', $nd->get('field_project_observers', -5, 3, 'field_project_observer_email'));
-
-out('field_project_observers.field_project_observer_emailXXX (INTENTIONAL BAD subfield)', $nd->get('field_project_observers', -5, 3, 'field_project_observer_XXXemail'));
-
-// this should return an array of observers, so let's dump it
-// note that this is still raw drupal LANGAUGE_NONE ... inside each array element
-// will need a function to take standard $nd->[LANGUAGE_NONE][0]... to array('subfieldname' => value)
-out('field_project_observers', $nd->get('field_project_observers', array(1,2,3)));
 

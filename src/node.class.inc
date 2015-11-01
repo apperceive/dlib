@@ -1,8 +1,14 @@
 <?php
 
-// drupal calls here
-//
-//
+// simple base class for accessing Drupal node fields
+
+// phase I: goal is read only node object that simplifies field access so that all 
+// index checking and error handling is hidden from caller and 'reasonable' results are
+// always returned, regardless of field initialization status/existance, etc.
+
+// main features of this class is to load node and provide a get method that can be used
+// for all fields of the underlying node
+
 
 class nodeClass {
   
@@ -10,24 +16,33 @@ class nodeClass {
 
   public function __construct($node) { 
     if ($node > 0)
-      $this->node = node_load($node);
+      $this->node = node_load($node);  // handle node id
     if ($node && is_object($node))
       $this->node = $node; 
-  }
+    if (!$node) 
+      $node = (object) array_fill_keys(array('nid', 'vid', 'type', 'uid', 'title', 'status', 'language', 'created', 'changed', 'promote', 'sticky', 'og', 'tnid', 'comment', 'translate', 'revision_timestamp', 'revision_uid', 'data'), NULL);
+  } // ctor
   
   public function toString() { 
     return var_export($this->node, 1); 
-  }
+  } // toString
   
+  // not used
+  /*
   protected function out($obj) { 
     return is_string($obj) ? $obj : var_export($obj, 1); 
   }
+  */
 
   // assumption: multifields and lists of multifields one level deep
   // eg. $node->field->subfield or $node->field can be lists or multis but no deeper
   // null $ndx means return all items as array if more than one, otherwise return scalar
   // return object for multivalue when subfield is null
-  public function get($fieldname, $retval = 0, $ndx = null, $subfieldname = null) {
+  public function get($fieldname, $retval = null, $ndx = null, $subfieldname = null) {
+    
+    // check that $this->node is valid
+    if (!($this->node && $this->node->type))
+      return $retval;
     
     // TODO: allow passing keys with this array as default
     $keys = array('nid', 'uid', 'tid', 'value');
@@ -37,17 +52,17 @@ class nodeClass {
     
     $field = $this->node->{$fieldname};
     
-    // scalar
+    // scalar, e.g. 'title' or 'type'
     if ($field && !is_array($field))
-      return $field;               // e.g. title
+      return $field;
     
     // not a valid field
     if (!($field && is_array($field) && array_key_exists(LANGUAGE_NONE, $field) && is_array($field[LANGUAGE_NONE]))) 
-      return $retval;      
+      return "ret - 1"; // $retval;      
     
     // if $ndx present, check validity
-    if (is_null($ndx) && !array_key_exists($ndx, $field[LANGUAGE_NONE]))
-      return $retval;
+    if (!(is_null($ndx) || array_key_exists($ndx, $field[LANGUAGE_NONE])))
+      return $retval; // "ret - 2";    
     
     // check if $fieldname[LANGUAGE_NONE][0] is a scalar
     if (!is_array($field[LANGUAGE_NONE][0]))
@@ -60,12 +75,28 @@ class nodeClass {
     $is_multi = array_key_exists('id', $field[LANGUAGE_NONE][0]);
       
     $cnt = count($field[LANGUAGE_NONE]);
-    $is_list = $cnt > 1;
+    // this is not a good enough test, 
+    // e.g., what if only 1 item in unlimited list?  
+    // TODO: rename to $has_list?
+    // looks like we need meta data
+    $is_list = $cnt > 1; 
+    
+    
+    
+  // Drupal  API calls 
+    $fields = field_info_extra_fields('node', $this->node->type, 'form');
+    $fields += field_info_instances('node', $this->node->type);     
+    
+    
     if ($is_list && is_null($ndx))
       $fielditem = $field[LANGUAGE_NONE];
-    else
-      $fielditem = $field[LANGUAGE_NONE][$ndx];
-    
+    else {
+      $i = is_null($ndx) ? 0 : $ndx;
+      if (is_array($field[LANGUAGE_NONE]) && array_key_exists($i, $field[LANGUAGE_NONE]))      
+        $fielditem = $field[LANGUAGE_NONE][$i];
+      else
+        return "ret - 5"; // todo - list with one element? ???
+    }
     
     // check if $fielditem is a string
     if (!is_array($fielditem))
@@ -73,26 +104,57 @@ class nodeClass {
     
     // test for subfield name
     if ($subfieldname && !array_key_exists($subfieldname, $fielditem))
-      return $retval;
+      return "ret - 3"; //$retval;      
       
     // TODO: return actual values
     if ($is_list) {
+      $arr = array();
       if (is_null($ndx))
-        if ($is_multi)
-          return "array object";
-        else
-          return "array scalar";
+        if ($is_multi) {
+          foreach($fielditem as $key => $value) {
+
+            // check for subfield, else return all fields
+            if (is_null($subfieldname))
+              if (array_key_exists($subfieldname, $value))
+                return $retval;
+              $v = $value[];
+            else
+              $v = "object goes here)"; // TODO:
+            $arr[$key] = $v; 
+          }
+          return $arr; // "array of objects";
+        }
+        else {
+          foreach($fielditem as $key => $value)
+            $arr[$key] = $value;
+          return $arr; // "array of scalars";
+        }
       else
-        if ($is_multi)
-          return "array of objects";
-        else
-          return "array of scalars";
+        if ($is_multi) {
+          
+          // check for subfield, else return all fields
+          
+          return $fielditem[$ndx]; // more to do?
+          //return "array element, object";
+        }
+        else {
+          return $fielditem[$ndx];
+          //return "array element, scalar";
+        }
     }
     else {
       if ($is_multi)
+        // check for subfield, else return all fields  
+      
         return "multi object";
-      else
-        return "multi scalar";
+      else {   
+        foreach ($keys as $key)
+          if (array_key_exists($key, $fielditem))
+            return $fielditem[$key];  // call get again?
+          
+        // todo: not a known key?
+        return "ret - 7"; // $fielditem; // "scalar"; uid, val etc
+      }
     } // not $is_list
 
     
@@ -130,9 +192,9 @@ class nodeClass {
     
     */
     
-    return $retval;  
+    return "ret - last"; //$retval;      
   } // get()
 
 
-} // NnodeClass
+} // nodeClass
 

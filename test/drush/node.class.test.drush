@@ -1,7 +1,9 @@
 #!/usr/bin/env drush
 <?php
 
+// test nodeClass get method to provide simple access Drupal node fields
 
+error_reporting(E_ALL);
 
 //include_once("/home/markus/node.class.inc");
 //drush_include("/home/markus/projects/dlib/", "node.class");
@@ -10,28 +12,49 @@
 drush_include("/home/markus/projects/dlib/src", "node.class");
  
 
+function out($l, $v) { 
+  $maxlen = 60;
+  if (is_null($v))
+    drush_print("$l: NULL");
+  else if (is_array($v) || is_object($v))
+    drush_print("$l: " . var_export($v, 1));
+  else if (is_string($v) && (drupal_strlen($v) > $maxlen))
+    drush_print("$l: " . substr($v, 0, $maxlen) . " ...");
+  else 
+    drush_print("$l: $v"); 
+} // out
+
 
 $nd = new nodeClass(207);
 
-print "title: " . $nd->get('title') . "\n";
+out('title', $nd->get('title'));
 
-print "field_project_status: " . $nd->get('field_project_status') . "\n";
+out('type', $nd->get('type'));
 
-print "field_messaging_obs_message: " . $nd->get('field_messaging_obs_message') . "\n";
+out('status', $nd->get('status'));
 
-print "field_project_subject.field_project_subject_email[0]: " . $nd->get('field_project_subject', -2, 0, 'field_project_subject_email') . "\n";
+out('markywarky (INTENTIONAL BAD FIELDNAME)', $nd->get('markywarky'));
 
-// should return null since this is not an array
-$v = $nd->get('field_project_subject', -3, 1, 'field_project_subject_email');
-print "field_project_subject.field_project_subject_email[1]: " . ($v ? $v : "NULL") . "\n";
+out('field_project_status', $nd->get('field_project_status'));
 
-print "field_project_observers.field_project_observer_email[0]: " . $nd->get('field_project_observers', -4, 0, 'field_project_observer_email') . "\n";
+out('field_project_manager', $nd->get('field_project_manager'));
 
-print "field_project_observers.field_project_observer_email: " . $nd->get('field_project_observers', -5, 3, 'field_project_observer_email') . "\n";
+out('field_messaging_obs_message', $nd->get('field_messaging_obs_message'));
+
+out('field_project_subject.field_project_subject_email[0]', $nd->get('field_project_subject', -2, 0, 'field_project_subject_email'));
+
+out('field_project_subject.field_project_subject_email[1] (INTENTIONAL BAD NDX)', $nd->get('field_project_subject', -3, 1, 'field_project_subject_email'));
+
+out('field_project_subject.field_project_subject_email[1] (INTENTIONAL BAD NDX, no retval)', $nd->get('field_project_subject', NULL, 1, 'field_project_subject_email'));
+
+out('field_project_observers.field_project_observer_email[0]', $nd->get('field_project_observers', -4, 0, 'field_project_observer_email'));
+
+out('field_project_observers.field_project_observer_email', $nd->get('field_project_observers', -5, 3, 'field_project_observer_email'));
+
+out('field_project_observers.field_project_observer_emailXXX (INTENTIONAL BAD subfield)', $nd->get('field_project_observers', -5, 3, 'field_project_observer_XXXemail'));
 
 // this should return an array of observers, so let's dump it
 // note that this is still raw drupal LANGAUGE_NONE ... inside each array element
 // will need a function to take standard $nd->[LANGUAGE_NONE][0]... to array('subfieldname' => value)
-$arr = $nd->get('field_project_observers', array(1,2,3));
-print "field_project_observers (array): " . "observers DUMP:\n";
-var_dump($arr);
+out('field_project_observers', $nd->get('field_project_observers', array(1,2,3)));
+

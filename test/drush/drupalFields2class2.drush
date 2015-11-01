@@ -1,20 +1,19 @@
 #!/usr/bin/env drush
 <?php
-  // move to constructor
-  //if ($node > 0) 
-  //  $node = node_load($node);
+
+  // Output class properties based on Drupal content type
 
   $args = drush_get_arguments() ;
-
-  // drush uses "args" array
   $classname = array_key_exists(1,$args) ? $args[1] : "unknown";
   $meths = "";
-  //$fields = array('field_body' => array('cardinality' => "1", 'type' => 'long_text', 'field_id' => 0));
+
+  // Drupal  API calls 
   $fields += field_info_extra_fields('node', $classname, 'form');
   $fields += field_info_instances('node', $classname);
   foreach ($fields as $fieldname => $ctdata) {
     $name = str_replace(array('field_project_','field_', ),'', $fieldname);
-    //var_dump($ctdata);
+    
+    // Drupal  API calls 
     $x = field_info_field($fieldname);                  // widget info
     $y = field_info_field_by_id($ctdata['field_id']);   // db info
 
@@ -24,19 +23,12 @@
     $is_ref = !(stripos($x['type'], 'reference') === FALSE);
     $is_bool = !(stripos($x['type'], 'boolean') === FALSE);
 
-    
     $init = $is_list ? " = array()" : ($is_multi ? " = new XXX()" : ($is_text ? " = ''" : ($is_ref? " = 0" : ($is_bool ? " = FALSE" : " = NULL")))); 
     
     print "  public $name$init;           // = \$this->get($fieldname);\n";
 
-    //print "$fieldname is a $t\n";
-    
+    // test
     if (!(stripos($fieldname, 'xxxfield_project_survey_language') === false)) 
       var_dump($x);
   } 
 
-  // "cardinality" 0 --> array getter
-  // user type and module info e.g. text.text_field
-  
-  
-  //print json_encode($fields); ?>

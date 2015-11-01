@@ -1,11 +1,13 @@
 #!/usr/bin/env drush
 <?php
 
-  // drush uses "args" array
+  // generate class get/sets based on Drupal content type
+
   $args = drush_get_arguments() ;
   $classname = array_key_exists(2,$args) ? $args[2] : "unknown";
   $meths = "";
 
+  // Drupal  API calls 
   $fields = field_info_extra_fields('node', $classname, 'form');
   $fields += field_info_instances('node', $classname); 
   foreach ($fields as $fieldname => $ctdata) {

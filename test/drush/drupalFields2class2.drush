@@ -2,12 +2,14 @@
 <?php
 
   // Output class properties based on Drupal content type
-
-  $args = drush_get_arguments() ;
-  $classname = array_key_exists(1,$args) ? $args[1] : "unknown";
+  $args = drush_get_arguments() ;     // drush_shift()
+  //var_dump($args);
+  $classname = array_key_exists(2,$args) ? $args[2] : "unknown";
+  //$classname = drush_get_option('everything')
   $meths = "";
 
   // Drupal  API calls 
+  $fields = array();
   $fields += field_info_extra_fields('node', $classname, 'form');
   $fields += field_info_instances('node', $classname);
   foreach ($fields as $fieldname => $ctdata) {
@@ -25,7 +27,7 @@
 
     $init = $is_list ? " = array()" : ($is_multi ? " = new XXX()" : ($is_text ? " = ''" : ($is_ref? " = 0" : ($is_bool ? " = FALSE" : " = NULL")))); 
     
-    print "  public $name$init;           // = \$this->get($fieldname);\n";
+    print "  public \$$name$init;           // = \$this->get($fieldname);\n";
 
     // test
     if (!(stripos($fieldname, 'xxxfield_project_survey_language') === false)) 

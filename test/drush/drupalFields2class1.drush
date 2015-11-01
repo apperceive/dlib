@@ -69,8 +69,12 @@ class <?php print $classname; ?>ClassFactory {
 
 // example usage
 
-$cls<?php print $classname; ?> = <?php print $classname; ?>ClassFactory:create(305);
+$id = 305;  // random nid, adjust for your own testing
 
-print $cls<?php print $classname; ?>->title;
+$o = <?php print $classname; ?>ClassFactory:create($id);
+
+print $o->title;
+
+var_dump($o);
 
 

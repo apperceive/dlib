@@ -7,6 +7,7 @@
   $classname = array_key_exists(2,$args) ? $args[2] : "unknown";
   $meths = "";
   $props = "";
+  $inits = "";
 
   // Drupal  API calls
   $fields = field_info_extra_fields('node', $classname, 'form');
@@ -14,11 +15,12 @@
   
   foreach ($fields as $fieldname => $ctdata) {
     // TODO: make all name processing optional, otherwise ensure always works
-    //$name = str_replace(array('field_project_','field_', ),'', $fieldname);
-    $name = $fieldname;
+    $name = str_replace(array('field_project_','field_', ),'', $fieldname);
+    //$name = $fieldname;
     $meths .= "  public function get_$name() { return \$this->out(\$this->_project->{$fieldname}, 1); }\n";
     $meths .= "  public function set_$name(\$$name) {}\n\n";
-    $props .= "  public $name = \$this->get('$name')\n";
+    $props .= "  public \$$name;\n";
+    $inits .= "    \$$name = \$this->get('$name');\n";
   }
 
   // output the following class template:
@@ -46,7 +48,10 @@ class <?php print $classname; ?>Class extends nodeClass {
 
   public function __construct($node) {
     parent::__construct($node);
-    $this->project = $node; // uncessary
+    $this->project = $node; // unnecessary?
+    
+    // init properties
+<?php print $inits; ?>
   }
 
   // override
@@ -72,7 +77,7 @@ class <?php print $classname; ?>ClassFactory {
 
 $id = 305;  // random nid, adjust for your own testing
 
-$o = <?php print $classname; ?>ClassFactory:create($id);
+$o = <?php print $classname; ?>ClassFactory::create($id);
 
 print $o->title;
 

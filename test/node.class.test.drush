@@ -9,7 +9,7 @@ error_reporting(E_ALL);
 //drush_include("/home/markus/projects/dlib/", "node.class");
 
 // TODO: make this relative
-drush_include("/home/markus/projects/dlib/src", "node.class");
+drush_include("/home/markus/projects/dlib/src/includes", "node.class");
  
 
 function out($l, $v) { 

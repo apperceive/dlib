@@ -12,14 +12,14 @@
 
 class nodeClass {
   
-  protected $node = NULL;
+  public $node = NULL;
   
   // private?
   protected $keys = array('nid', 'uid', 'tid', 'value');
 
   public function __construct($node) { 
     if ($node > 0)
-      $this->node = node_load($node);  // handle node id
+      $node = node_load($node);  // handle node id
     if ($node && is_object($node))
       $this->node = $node; 
     if (!$node) 

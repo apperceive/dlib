@@ -175,6 +175,7 @@ class nodeClass {
   
   // not used?
   // get array or singleton of objects or values
+  /*
   public function get_objs_or_values($data = array(), $fname = NULL, $retval = NULL) {
     
     // return single object
@@ -199,6 +200,7 @@ class nodeClass {
     }
     return $retval;
   } // get_objs_or_values
+  */
   
   // get an object or value in something of the form $f[LANGUAGE_NONE][0]['keyname']
   // return the value associated with key name if supplied or one of 'nid', 'uid', etc

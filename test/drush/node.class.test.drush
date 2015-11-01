@@ -61,7 +61,7 @@ function outputProject($nd) {
   // this should return an array of observers, so let's dump it
   // note that this is still raw drupal LANGAUGE_NONE ... inside each array element
   // will need a function to take standard $nd->[LANGUAGE_NONE][0]... to array('subfieldname' => value)
-  out('field_project_observers', $nd->get('field_project_observers', array(1,2,3)));
+  out('field_project_observers', $nd->get('field_project_observers', array("error","123")));
 
 } // outputProject
 

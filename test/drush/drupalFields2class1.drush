@@ -14,7 +14,8 @@
   
   foreach ($fields as $fieldname => $ctdata) {
     // TODO: make all name processing optional, otherwise ensure always works
-    $name = str_replace(array('field_project_','field_', ),'', $fieldname);
+    //$name = str_replace(array('field_project_','field_', ),'', $fieldname);
+    $name = $fieldname;
     $meths .= "  public function get_$name() { return \$this->out(\$this->_project->{$fieldname}, 1); }\n";
     $meths .= "  public function set_$name(\$$name) {}\n\n";
     $props .= "  public $name = \$this->get('$name')\n";

@@ -14,6 +14,7 @@ class nodeClass {
   
   protected $node = NULL;
   
+  // private?
   protected $keys = array('nid', 'uid', 'tid', 'value');
 
   public function __construct($node) { 
@@ -28,14 +29,8 @@ class nodeClass {
   public function toString() { 
     return var_export($this->node, 1); 
   } // toString
-  
-  // not used
-  /*
-  protected function out($obj) { 
-    return is_string($obj) ? $obj : var_export($obj, 1); 
-  }
-  */
 
+  // TODO: make this protected?
   // assumption: multifields and lists of multifields one level deep
   // eg. $node->field->subfieldname or $node->field can be lists or multis but no deeper
   // null $ndx means return all items as array if more than one, otherwise return scalar
@@ -202,6 +197,7 @@ class nodeClass {
   } // get_objs_or_values
   */
   
+  // private?
   // get an object or value in something of the form $f[LANGUAGE_NONE][0]['keyname']
   // return the value associated with key name if supplied or one of 'nid', 'uid', etc
   // otherwise return entire endpoint as an array, indexed by fieldname
@@ -265,6 +261,7 @@ class nodeClass {
     return $retval;
   } // $this->get_obj_or_value
   
+  // private
   public function check_keys($data, $retval = NULL) {
     if (!is_null($data) && is_array($data)) {
       foreach ($this->keys as $key)
@@ -274,10 +271,16 @@ class nodeClass {
     return $retval;
   } //check_keys
   
+  // private
   public function is_drupal_object($value) {
      return is_array($value) && array_key_exists(LANGUAGE_NONE, $value) && is_array($value[LANGUAGE_NONE]) && array_key_exists(0, $value[LANGUAGE_NONE]) && is_array($value[LANGUAGE_NONE][0]) && array_key_exists('value', $value[LANGUAGE_NONE][0]);
   } // is_drupal_object
   
+  // protected
+  public function out($obj) { 
+    return is_string($obj) ? obj : var_export($obj, 1); 
+  }
+
 
 } // nodeClass
 

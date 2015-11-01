@@ -6,24 +6,71 @@
   $args = drush_get_arguments() ;
   $classname = array_key_exists(2,$args) ? $args[2] : "unknown";
   $meths = "";
+  $props = "";
 
-  // Drupal  API calls 
+  // Drupal  API calls
   $fields = field_info_extra_fields('node', $classname, 'form');
-  $fields += field_info_instances('node', $classname); 
+  $fields += field_info_instances('node', $classname);
+  
   foreach ($fields as $fieldname => $ctdata) {
+    // TODO: make all name processing optional, otherwise ensure always works
     $name = str_replace(array('field_project_','field_', ),'', $fieldname);
     $meths .= "  public function get_$name() { return \$this->out(\$this->_project->{$fieldname}, 1); }\n";
     $meths .= "  public function set_$name(\$$name) {}\n\n";
-  } 
+    $props .= "  public $name = \$this->get('$name')\n";
+  }
 
-  $props = "  protected \$_project = NULL;\n";
+  // output the following class template:
   
-  $ctor = "  public function __construct(\$node) { \$this->_project = \$node; }\n";
-  $ctor .= "  public function toString() { return var_export(\$this->_project, 1); }\n";
-  $ctor .= "  protected function out(\$obj) { return is_string(\$obj) ? \$obj : var_export(\$obj, 1); }\n";
-
-  $c = "<?php\n\nclass {$classname}Class { \n\n$props\n$ctor\n$meths\n} // {$classname}Class\n\n";
-  print $c;
-  
-  //print json_encode($fields);
+  print "<?php";
 ?>
+
+/*
+ * This is generated code!!!!
+ * DO NOT EDIT!!! (unless you want to fork this on it's own)
+ * Use "drush @slndev scr test/drush/drupalFields2class1.drush sln_project_360" 
+ * on command line from within the dlib root folder
+ */
+
+error_reporting(E_ALL);
+
+// TODO: make this relative
+drush_include("/home/markus/projects/dlib/src", "node.class");
+
+
+class <?php print $classname; ?>Class extends nodeClass {
+
+  // remove?
+  protected $project = NULL; // why? we already have $node;
+
+  public function __construct($node) {
+    parent::__construct($node);
+    $this->project = $node; // uncessary
+  }
+
+  // override
+  public function toString() { return var_export($this->project, 1); }
+
+  // properties
+<?php print $props; ?>
+
+  // methods
+<?php print $meths; ?>
+
+} // <?php print $classname; ?>Class
+
+
+class <?php print $classname; ?>ClassFactory {
+  public static function create($node) {
+    return new <?php print $classname; ?>Class($node);
+  }
+} // <?php print $classname; ?>ClassFactory
+
+
+// example usage
+
+$cls<?php print $classname; ?> = <?php print $classname; ?>ClassFactory:create(305);
+
+print $cls<?php print $classname; ?>->title;
+
+

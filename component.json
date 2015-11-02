@@ -1,0 +1,11 @@
+{
+  "name": "dli",
+  "version": "0.1.0",
+  //"main": "./styles.css",
+  "dependencies": {
+    //"normalize": "2.0.1",
+    //"stitch-css": "0.2.0",
+    //"suit-utils": "0.1.0",
+   // "suit-button": "0.1.0"
+  }
+}

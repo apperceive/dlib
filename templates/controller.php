@@ -1,6 +1,6 @@
 <?php
 
-// add include
+include("./template.class.inc");
 
 
 $view = new Template();

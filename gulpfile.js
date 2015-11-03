@@ -11,9 +11,29 @@ const concat = require('gulp-concat');
 const notify = require('gulp-notify');
 const rename = require('gulp-rename');
 var replace = require('gulp-replace');
+ bower = require('gulp-bower');
+var jade = require('gulp-jade');
+var data = require('gulp-data');
 const del = require('del');
-
+var path = require('path');
 */
+
+var config = {
+  //sassPath: './resources/sass',
+  bowerDir: './bower_components'
+}
+
+gulp.task('bower', function() {
+  return bower()
+    .pipe(gulp.dest(config.bowerDir))
+});
+
+
+gulp.task('icons', function() {
+  return gulp.src(config.bowerDir + '/fontawesome/fonts/**.*')
+    .pipe(gulp.dest('./public/fonts'));
+});
+
 
 
 
@@ -52,6 +72,12 @@ gulp.task('phplint', function(cb) {
 // gulp.watch('js/**/*.js', function(event) {
   // console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
 // });
+
+gulp.task('jade', function() {
+    return gulp.src('src/templates/**/*.jade')
+        .pipe(jade()) // pip to jade plugin
+        .pipe(gulp.dest('builds/development')); // tell gulp our output folder
+});
 
 
 // default gulp task

@@ -1,8 +1,40 @@
 {
-    "name": "apperceive/dlib",
-    "description": "Drupal object library",
-    "require": {
-        "php": ">=5.3.0",
-        "another-vendor/package": "1.*"
-    }
+  "name": "@apperceive/dlib",
+  "version": "0.1.1",
+  "description": "Drupal object library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apperceive/dlib/dlib.git"
+  },
+  "main": "gulpfile.js",
+  "license": "MIT",
+  "require": {
+    "php": ">=5.3.0",
+    "another-vendor/package": "1.*"
+  },
+  "dependencies": {
+    "yeoman-generator": "^0.21.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Markus Sandy <markus.sandy@gmail.com> (http://apperceive.com)",
+  "keywords": [
+    "drupal",
+    "drush"
+  ],
+  "bugs": {
+    "url": "https://github.com/apperceive/dlib/issues"
+  },
+  "contributors": "@apperceive",
+  "homepage": "https://github.com/apperceive/dlib",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "directories": {
+    "test": "test"
+  }
 }
